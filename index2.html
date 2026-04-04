@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bhavik Patel | Full Stack .NET Engineer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #060608;
+      --surface: #0e0e12;
+      --border: #1c1c24;
+      --border-hover: #3b82f6;
+      --accent: #3b82f6;
+      --accent2: #60a5fa;
+      --text: #e2e8f0;
+      --muted: #6b7280;
+      --faint: #1a1a24;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ---- NOISE OVERLAY ---- */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(6,6,8,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: auto;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 24px;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-left: 32px;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+    nav a.cta {
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 6px 16px;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+    }
+    nav a.cta:hover { background: var(--accent); color: #fff; }
+
+    /* ---- HERO ---- */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 120px 24px 80px;
+      max-width: 1100px; margin: auto;
+      position: relative;
+    }
+
+    .hero-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-tag::before {
+      content: '';
+      display: inline-block; width: 32px; height: 1px;
+      background: var(--accent);
+    }
+
+    h1.hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: 1.05;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+    h1.hero-title em {
+      font-style: italic;
+      color: var(--accent2);
+    }
+
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    .hero-links {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 28px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: all 0.25s;
+      font-family: 'DM Mono', monospace;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+    }
+    .btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+    .btn-outline {
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-contact {
+      margin-top: 56px;
+      display: flex; gap: 32px; flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+    }
+    .contact-item {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .contact-item span { color: var(--text); display: block; margin-top: 2px; }
+    .contact-item:hover span { color: var(--accent); }
+
+    /* ---- SECTIONS ---- */
+    section {
+      padding: 100px 24px;
+    }
+    .inner { max-width: 1100px; margin: auto; }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1; max-width: 60px; height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    h2.section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 400;
+      margin-bottom: 56px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ---- ABOUT ---- */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+    @media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+    .about-text p {
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .edu-list { display: flex; flex-direction: column; gap: 20px; }
+    .edu-item {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+    .edu-item h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .edu-item p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ---- SKILLS ---- */
+    #skills { background: var(--surface); }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .skill-tag {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--faint);
+      transition: all 0.2s;
+    }
+    .skill-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(59,130,246,0.05);
+    }
+    .skill-tag .dot {
+      display: inline-block; width: 6px; height: 6px;
+      background: var(--accent); border-radius: 50%;
+      margin-right: 8px; opacity: 0.6;
+    }
+
+    /* ---- EXPERIENCE ---- */
+    .exp-list { display: flex; flex-direction: column; gap: 0; }
+
+    .exp-item {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 40px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 768px) {
+      .exp-item { grid-template-columns: 1fr; gap: 16px; }
+    }
+
+    .exp-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .exp-meta strong {
+      display: block; margin-bottom: 6px;
+      color: var(--text); font-size: 0.78rem;
+    }
+    .exp-badge {
+      display: inline-block; margin-top: 10px;
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-color: rgba(59,130,246,0.3);
+    }
+
+    .exp-content h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .exp-content ul {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .exp-content li {
+      font-size: 0.875rem;
+      color: var(--muted);
+      padding-left: 16px;
+      position: relative;
+    }
+    .exp-content li::before {
+      content: '—';
+      position: absolute; left: 0;
+      color: var(--accent); opacity: 0.5;
+    }
+
+    /* ---- PROJECTS ---- */
+    #projects { background: var(--surface); }
+
+    .projects-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 40px;
+    }
+    .projects-header h2 { margin-bottom: 0; }
+
+    .proj-company {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      margin-top: 48px;
+    }
+    .proj-company:first-of-type { margin-top: 0; }
+
+    .proj-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .proj-card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--faint);
+      transition: all 0.25s;
+      cursor: default;
+    }
+    .proj-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      background: rgba(59,130,246,0.04);
+    }
+    .proj-card h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .proj-card p {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* ---- INTERNSHIP ---- */
+    .intern-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) { .intern-grid { grid-template-columns: 1fr; } }
+
+    .intern-card {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      transition: border-color 0.2s;
+    }
+    .intern-card:hover { border-color: var(--accent); }
+    .intern-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .intern-card .period {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .intern-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .intern-card li {
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding-left: 14px;
+      position: relative;
+    }
+    .intern-card li::before {
+      content: '→';
+      position: absolute; left: 0;
+      color: var(--accent); opacity: 0.5;
+      font-size: 0.65rem; top: 3px;
+    }
+
+    /* ---- CERTS ---- */
+    #certifications { background: var(--surface); }
+
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .cert-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--faint);
+      font-size: 0.82rem;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .cert-item:hover { border-color: var(--accent); color: var(--text); }
+    .cert-item::before {
+      content: '✦';
+      color: var(--accent);
+      font-size: 0.65rem;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    /* ---- FOOTER ---- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+    }
+    .footer-inner {
+      max-width: 1100px; margin: auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-left {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ---- SCROLL ANIMATION ---- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<header>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Bhavik Patel</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Work</a>
+      <a href="#certifications">Certs</a>
+      <a href="./assets/Resume.pdf" target="_blank" class="cta">Resume ↗</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-tag">Available for opportunities</p>
+  <h1 class="hero-title">
+    Full Stack<br>
+    <em>.NET Engineer</em>
+  </h1>
+  <p class="hero-desc">
+    Building scalable backend systems, enterprise APIs, and government-grade applications.
+    Focused on performance, security, and real-world impact.
+  </p>
+  <div class="hero-links">
+    <a href="mailto:patel021299@gmail.com" class="btn btn-primary">Get in touch</a>
+    <a href="https://github.com/bhavikpatel99" target="_blank" class="btn btn-outline">GitHub ↗</a>
+    <a href="https://www.linkedin.com/in/patelbhavik021299/" target="_blank" class="btn btn-outline">LinkedIn ↗</a>
+  </div>
+  <div class="hero-contact">
+    <a class="contact-item" href="mailto:patel021299@gmail.com">
+      Email
+      <span>patel021299@gmail.com</span>
+    </a>
+    <a class="contact-item" href="tel:+917486916749">
+      Phone
+      <span>+91-7486916749</span>
+    </a>
+    <div class="contact-item">
+      Location
+      <span>Sachin, Surat — 394230</span>
+    </div>
+    <div class="contact-item">
+      GitHub
+      <span>bhavikpatel99</span>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="inner reveal">
+    <p class="section-label">Who I am</p>
+    <h2 class="section-title">About</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          I'm a Full Stack .NET Developer with hands-on experience building scalable applications
+          for government agencies and enterprise clients. My work spans backend architecture,
+          REST API development, database optimization, and security hardening.
+        </p>
+        <p>
+          I've delivered solutions across the full software lifecycle — from requirement
+          gathering and design to deployment and ongoing maintenance — for clients including
+          Surat Municipal Corporation and Gujarat Info Petro Limited.
+        </p>
+        <p>
+          Beyond development, I have a strong interest in cybersecurity, having worked on
+          VAPT projects, CTF challenges, and network security research. I'm also actively
+          exploring Gen AI and ML.
+        </p>
+      </div>
+      <div>
+        <p class="section-label" style="margin-bottom: 20px;">Education</p>
+        <div class="edu-list">
+          <div class="edu-item">
+            <h4>Master of Computer Application</h4>
+            <p>Veer Narmad South Gujarat University · 2019 – 2022</p>
+          </div>
+          <div class="edu-item">
+            <h4>Bachelor of Computer Application</h4>
+            <p>UCCC & SPBCBA & SDHGCBCA & IT College · 2016 – 2019</p>
+          </div>
+          <div class="edu-item">
+            <h4>HSC — Gujarat Board</h4>
+            <p>Ld High School · 2015 – 2016</p>
+          </div>
+          <div class="edu-item">
+            <h4>SSC — Gujarat Board</h4>
+            <p>Sir C.J. Navsari Zarthosti Madresa High School · 2013 – 2014</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="inner reveal">
+    <p class="section-label">What I work with</p>
+    <h2 class="section-title">Core Expertise</h2>
+    <div class="skills-grid">
+      <div class="skill-tag"><span class="dot"></span>.NET Core</div>
+      <div class="skill-tag"><span class="dot"></span>.NET Framework</div>
+      <div class="skill-tag"><span class="dot"></span>Web API</div>
+      <div class="skill-tag"><span class="dot"></span>Fast API</div>
+      <div class="skill-tag"><span class="dot"></span>PostgreSQL</div>
+      <div class="skill-tag"><span class="dot"></span>MS SQL Server</div>
+      <div class="skill-tag"><span class="dot"></span>MySQL</div>
+      <div class="skill-tag"><span class="dot"></span>RDLC / SSRS Reports</div>
+      <div class="skill-tag"><span class="dot"></span>HTML / CSS / JS</div>
+      <div class="skill-tag"><span class="dot"></span>Bootstrap</div>
+      <div class="skill-tag"><span class="dot"></span>PHP · CodeIgniter V3</div>
+      <div class="skill-tag"><span class="dot"></span>Python</div>
+      <div class="skill-tag"><span class="dot"></span>Git / GitHub</div>
+      <div class="skill-tag"><span class="dot"></span>Azure DevOps</div>
+      <div class="skill-tag"><span class="dot"></span>Project Architecture</div>
+      <div class="skill-tag"><span class="dot"></span>VAPT / Security</div>
+      <div class="skill-tag"><span class="dot"></span>CTF Challenges</div>
+      <div class="skill-tag"><span class="dot"></span>Gen AI</div>
+      <div class="skill-tag"><span class="dot"></span>Scrum / Agile</div>
+      <div class="skill-tag"><span class="dot"></span>Project Management</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="inner reveal">
+    <p class="section-label">Where I've worked</p>
+    <h2 class="section-title">Experience</h2>
+    <div class="exp-list">
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <strong>May 2025 – Present</strong>
+          Silver Touch Technologies
+          <span class="exp-badge">Current</span>
+        </div>
+        <div class="exp-content">
+          <h3>Software Developer</h3>
+          <ul>
+            <li>Working with Surat Municipal Corporation (SMC) to understand software development needs and requirements</li>
+            <li>Developed and implemented software solutions to enhance processes and improve overall efficiency</li>
+            <li>Played a key role in designing, coding, testing, and debugging applications tailored to SMC specifications</li>
+            <li>Worked closely with teams to ensure seamless integration of software into existing systems</li>
+            <li>Provided ongoing support and maintenance, addressing issues and bugs promptly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <strong>Sep 2023 – Apr 2025</strong>
+          Ethos HR Management & Projects Pvt. Ltd
+        </div>
+        <div class="exp-content">
+          <h3>Software Developer</h3>
+          <ul>
+            <li>Collaborated with the Gujarat Info Petro Limited (GIPL) team to gather and implement software requirements</li>
+            <li>Developed full-lifecycle enterprise solutions — design, coding, testing, debugging, and deployment</li>
+            <li>Worked across cross-functional teams to ensure seamless integration with existing systems</li>
+            <li>Provided ongoing support, maintenance, and bug resolution for production applications</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-meta">
+          <strong>Oct 2022 – Aug 2023</strong>
+          Sumantra Strategies Pvt. Ltd
+        </div>
+        <div class="exp-content">
+          <h3>IT Consultant · Web Application Developer</h3>
+          <ul>
+            <li>Full SDLC including requirement gathering from clients and delivering before timelines</li>
+            <li>Designed UIs and navigation flows; wrote and reviewed HTML, CSS, JS, PHP (CodeIgniter V3)</li>
+            <li>Database work with MySQL; integrated multimedia content and resolved UX/performance issues</li>
+            <li>Managed social media, domain names, and hosting (Hostinger, GoDaddy)</li>
+            <li>Implemented Google Analytics and Facebook Pixel for data-driven insights</li>
+            <li>Delivered JBGO (jbgo.biz) and Altavista Homes (altavistahomes.in) projects</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="inner reveal">
+    <p class="section-label">Things I've built</p>
+    <h2 class="section-title">Selected Work</h2>
+
+    <p class="proj-company">Silver Touch Technologies — Surat Municipal Corporation</p>
+    <div class="proj-grid">
+      <div class="proj-card">
+        <h4>SMC Platform</h4>
+        <p>Government software development for Surat Municipal Corporation — scalable .NET solutions for civic operations.</p>
+      </div>
+    </div>
+
+    <p class="proj-company">Ethos HR Management — GIPL & Others</p>
+    <div class="proj-grid">
+      <div class="proj-card">
+        <h4>Sampark4GenX</h4>
+        <p>SaaS attendance system with backend optimization and API integration.</p>
+      </div>
+      <div class="proj-card">
+        <h4>CRD-EMS</h4>
+        <p>Recreated in open-source architecture as team lead.</p>
+      </div>
+      <div class="proj-card">
+        <h4>Gujsail Inventory</h4>
+        <p>Inventory management system for enterprise operations.</p>
+      </div>
+      <div class="proj-card">
+        <h4>GEMERS CMS</h4>
+        <p>Content management system for government entity.</p>
+      </div>
+      <div class="proj-card">
+        <h4>AUDA Website</h4>
+        <p>Revamp project for Ahmedabad Urban Development Authority.</p>
+      </div>
+      <div class="proj-card">
+        <h4>HRMS</h4>
+        <p>Human resource management system — bug fixing and feature modification.</p>
+      </div>
+      <div class="proj-card">
+        <h4>GIPL Company Website</h4>
+        <p>Official company website for Gujarat Info Petro Limited.</p>
+      </div>
+      <div class="proj-card">
+        <h4>BSF Bootcamp Website</h4>
+        <p>Web platform for Border Security Force bootcamp program.</p>
+      </div>
+      <div class="proj-card">
+        <h4>Commissioner of Fisheries</h4>
+        <p>Government portal — bug fixing and module modification.</p>
+      </div>
+      <div class="proj-card">
+        <h4>VNSGU E-Filing</h4>
+        <p>E-filing portal with new File Review module added.</p>
+      </div>
+      <div class="proj-card">
+        <h4>SSA GyanSahayak Recruitment</h4>
+        <p>Primary school teacher recruitment system — School Selection module.</p>
+      </div>
+      <div class="proj-card">
+        <h4>COS Old Teacher</h4>
+        <p>School Selection module for government teacher management.</p>
+      </div>
+      <div class="proj-card">
+        <h4>Home Department Website</h4>
+        <p>Official website for Gujarat Home Department.</p>
+      </div>
+      <div class="proj-card">
+        <h4>GARC Website</h4>
+        <p>Gujarat Administrative Reforms Commission public portal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERNSHIPS -->
+<section id="internships">
+  <div class="inner reveal">
+    <p class="section-label">Early Experience</p>
+    <h2 class="section-title">Internships</h2>
+    <div class="intern-grid">
+      <div class="intern-card">
+        <h4>WhizHack Technologies</h4>
+        <p class="period">Part-Time Intern · Feb 2023 – Apr 2023</p>
+        <ul>
+          <li>VAPT projects — SQL Injection and Cross-Site Scripting (XSS)</li>
+          <li>CTF Challenges participation and completion</li>
+          <li>Network tools research — Wireshark, Nmap, Bettercap</li>
+          <li>Cyber Defense programs with IITJ TISC collaboration</li>
+        </ul>
+      </div>
+      <div class="intern-card">
+        <h4>Anand System Inc.</h4>
+        <p class="period">Intern · Feb 2022 – Jul 2022</p>
+        <ul>
+          <li>Worked on Hotel Motel Software — a company product</li>
+          <li>Technology stack: .NET Framework, VB Script, MS SQL Server</li>
+          <li>Participated in development, integration, and testing phases</li>
+          <li>Followed organizational and project-level processes throughout</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="inner reveal">
+    <p class="section-label">Credentials</p>
+    <h2 class="section-title">Certifications</h2>
+    <div class="cert-grid">
+      <div class="cert-item">Anand Systems Internship Completion</div>
+      <div class="cert-item">Practical Web Apps Hacking — 7-Day Bootcamp</div>
+      <div class="cert-item">Azure DevOps Boards</div>
+      <div class="cert-item">Machine Learning with Python</div>
+      <div class="cert-item">Python 101 for Data Science</div>
+      <div class="cert-item">Cyber Samurai Program in Cyber Defense (Whizhack, IITJ TISC)</div>
+      <div class="cert-item">Cyber Guru Program in Cyber Defense (Whizhack, IITJ TISC)</div>
+      <div class="cert-item">Challenge: Space Mission</div>
+      <div class="cert-item">Mastering DevOps Webinar</div>
+      <div class="cert-item">AI For India 2.0</div>
+      <div class="cert-item">SaWiT.AI Challenge</div>
+      <div class="cert-item">Scrum Certification + Scrum Master + Agile Scrum Training</div>
+      <div class="cert-item">Gen AI Academy</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">Bhavik Patel</div>
+    <div class="footer-links">
+      <a href="mailto:patel021299@gmail.com">Email</a>
+      <a href="https://github.com/bhavikpatel99" target="_blank">GitHub</a>
+      <a href="https://www.linkedin.com/in/patelbhavik021299/" target="_blank">LinkedIn</a>
+      <a href="tel:+917486916749">+91-7486916749</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
