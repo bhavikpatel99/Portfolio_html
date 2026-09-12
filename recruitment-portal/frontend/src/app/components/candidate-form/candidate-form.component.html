@@ -98,12 +98,22 @@
         <input id="city" type="text" formControlName="city" />
       </div>
       <div class="form-group">
-        <label for="state">State / Province</label>
-        <input id="state" type="text" formControlName="state" />
+        <label for="country">Country</label>
+        <select id="country" formControlName="country" (change)="onCountryChange()">
+          <option value="">-- Select country --</option>
+          <option *ngFor="let c of countries" [value]="c.name">{{ c.name }}</option>
+        </select>
       </div>
       <div class="form-group">
-        <label for="country">Country</label>
-        <input id="country" type="text" formControlName="country" />
+        <label for="state">State / Province</label>
+        <!-- When the selected country has seeded states, show a dropdown… -->
+        <select id="state" *ngIf="states.length > 0" formControlName="state">
+          <option value="">-- Select state --</option>
+          <option *ngFor="let s of states" [value]="s.name">{{ s.name }}</option>
+        </select>
+        <!-- …otherwise fall back to free text so any region can be entered. -->
+        <input id="stateText" *ngIf="states.length === 0" type="text" formControlName="state"
+               [placeholder]="loadingStates ? 'Loading states…' : 'Enter state / province'" />
       </div>
       <div class="form-group">
         <label for="postalCode">Postal Code</label>

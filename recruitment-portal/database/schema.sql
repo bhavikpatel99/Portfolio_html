@@ -121,5 +121,132 @@ IF COL_LENGTH('dbo.Candidates', 'ReferenceContact')  IS NULL ALTER TABLE dbo.Can
 IF COL_LENGTH('dbo.Candidates', 'Source')            IS NULL ALTER TABLE dbo.Candidates ADD Source            NVARCHAR(50)  NULL;
 GO
 
+/* ---------------------------------------------------------------------
+   Lookup tables - drive the form's dropdowns dynamically from the DB.
+   Countries -> States (cascading), plus generic LookupValues for
+   Gender / MaritalStatus / EmploymentType / Source.
+   --------------------------------------------------------------------- */
+IF OBJECT_ID('dbo.Countries', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Countries
+    (
+        Id   INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        Code NVARCHAR(3)       NOT NULL,
+        Name NVARCHAR(100)     NOT NULL
+    );
+    CREATE UNIQUE INDEX UX_Countries_Code ON dbo.Countries(Code);
+END
+GO
+
+IF OBJECT_ID('dbo.States', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.States
+    (
+        Id        INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        CountryId INT               NOT NULL,
+        Name      NVARCHAR(100)     NOT NULL,
+        CONSTRAINT FK_States_Countries FOREIGN KEY (CountryId) REFERENCES dbo.Countries(Id)
+    );
+    CREATE INDEX IX_States_CountryId ON dbo.States(CountryId);
+END
+GO
+
+IF OBJECT_ID('dbo.LookupValues', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.LookupValues
+    (
+        Id        INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        Category  NVARCHAR(50)      NOT NULL,
+        Value     NVARCHAR(100)     NOT NULL,
+        SortOrder INT               NOT NULL CONSTRAINT DF_LookupValues_SortOrder DEFAULT(0)
+    );
+    CREATE INDEX IX_LookupValues_Category ON dbo.LookupValues(Category);
+END
+GO
+
+/* ---- Seed Countries (only when empty) ---- */
+IF NOT EXISTS (SELECT 1 FROM dbo.Countries)
+BEGIN
+    INSERT INTO dbo.Countries (Code, Name) VALUES
+        ('IN', 'India'),
+        ('US', 'United States'),
+        ('GB', 'United Kingdom'),
+        ('CA', 'Canada'),
+        ('AU', 'Australia'),
+        ('DE', 'Germany'),
+        ('FR', 'France'),
+        ('SG', 'Singapore'),
+        ('AE', 'United Arab Emirates'),
+        ('JP', 'Japan');
+END
+GO
+
+/* ---- Seed States for the major countries (only when empty) ---- */
+IF NOT EXISTS (SELECT 1 FROM dbo.States)
+BEGIN
+    -- India (states + union territories)
+    INSERT INTO dbo.States (CountryId, Name)
+    SELECT c.Id, s.Name
+    FROM (VALUES
+        ('Andhra Pradesh'),('Arunachal Pradesh'),('Assam'),('Bihar'),('Chhattisgarh'),
+        ('Goa'),('Gujarat'),('Haryana'),('Himachal Pradesh'),('Jharkhand'),('Karnataka'),
+        ('Kerala'),('Madhya Pradesh'),('Maharashtra'),('Manipur'),('Meghalaya'),('Mizoram'),
+        ('Nagaland'),('Odisha'),('Punjab'),('Rajasthan'),('Sikkim'),('Tamil Nadu'),('Telangana'),
+        ('Tripura'),('Uttar Pradesh'),('Uttarakhand'),('West Bengal'),
+        ('Andaman and Nicobar Islands'),('Chandigarh'),('Dadra and Nagar Haveli and Daman and Diu'),
+        ('Delhi'),('Jammu and Kashmir'),('Ladakh'),('Lakshadweep'),('Puducherry')
+    ) AS s(Name) CROSS JOIN dbo.Countries c WHERE c.Code = 'IN';
+
+    -- United States
+    INSERT INTO dbo.States (CountryId, Name)
+    SELECT c.Id, s.Name
+    FROM (VALUES
+        ('Alabama'),('Alaska'),('Arizona'),('Arkansas'),('California'),('Colorado'),('Connecticut'),
+        ('Delaware'),('Florida'),('Georgia'),('Hawaii'),('Idaho'),('Illinois'),('Indiana'),('Iowa'),
+        ('Kansas'),('Kentucky'),('Louisiana'),('Maine'),('Maryland'),('Massachusetts'),('Michigan'),
+        ('Minnesota'),('Mississippi'),('Missouri'),('Montana'),('Nebraska'),('Nevada'),
+        ('New Hampshire'),('New Jersey'),('New Mexico'),('New York'),('North Carolina'),
+        ('North Dakota'),('Ohio'),('Oklahoma'),('Oregon'),('Pennsylvania'),('Rhode Island'),
+        ('South Carolina'),('South Dakota'),('Tennessee'),('Texas'),('Utah'),('Vermont'),
+        ('Virginia'),('Washington'),('West Virginia'),('Wisconsin'),('Wyoming')
+    ) AS s(Name) CROSS JOIN dbo.Countries c WHERE c.Code = 'US';
+
+    -- Canada
+    INSERT INTO dbo.States (CountryId, Name)
+    SELECT c.Id, s.Name
+    FROM (VALUES
+        ('Alberta'),('British Columbia'),('Manitoba'),('New Brunswick'),
+        ('Newfoundland and Labrador'),('Northwest Territories'),('Nova Scotia'),('Nunavut'),
+        ('Ontario'),('Prince Edward Island'),('Quebec'),('Saskatchewan'),('Yukon')
+    ) AS s(Name) CROSS JOIN dbo.Countries c WHERE c.Code = 'CA';
+
+    -- Australia
+    INSERT INTO dbo.States (CountryId, Name)
+    SELECT c.Id, s.Name
+    FROM (VALUES
+        ('New South Wales'),('Victoria'),('Queensland'),('Western Australia'),
+        ('South Australia'),('Tasmania'),('Australian Capital Territory'),('Northern Territory')
+    ) AS s(Name) CROSS JOIN dbo.Countries c WHERE c.Code = 'AU';
+
+    -- United Kingdom
+    INSERT INTO dbo.States (CountryId, Name)
+    SELECT c.Id, s.Name
+    FROM (VALUES
+        ('England'),('Scotland'),('Wales'),('Northern Ireland')
+    ) AS s(Name) CROSS JOIN dbo.Countries c WHERE c.Code = 'GB';
+END
+GO
+
+/* ---- Seed generic lookup values (only when empty) ---- */
+IF NOT EXISTS (SELECT 1 FROM dbo.LookupValues)
+BEGIN
+    INSERT INTO dbo.LookupValues (Category, Value, SortOrder) VALUES
+        ('Gender', 'Male', 1), ('Gender', 'Female', 2), ('Gender', 'Other', 3), ('Gender', 'Prefer not to say', 4),
+        ('MaritalStatus', 'Single', 1), ('MaritalStatus', 'Married', 2), ('MaritalStatus', 'Divorced', 3), ('MaritalStatus', 'Widowed', 4), ('MaritalStatus', 'Prefer not to say', 5),
+        ('EmploymentType', 'Full-time', 1), ('EmploymentType', 'Part-time', 2), ('EmploymentType', 'Contract', 3), ('EmploymentType', 'Freelance', 4), ('EmploymentType', 'Internship', 5),
+        ('Source', 'Job Board', 1), ('Source', 'LinkedIn', 2), ('Source', 'Referral', 3), ('Source', 'Company Website', 4), ('Source', 'Social Media', 5), ('Source', 'Other', 6);
+END
+GO
+
 PRINT 'RecruitmentPortal schema is ready.';
 GO

@@ -75,6 +75,14 @@ tables.
 | POST   | `/api/candidates`        | JWT   | Submit a candidate application |
 | PUT    | `/api/candidates/{id}`   | JWT   | Update a candidate application |
 | DELETE | `/api/candidates/{id}`   | JWT   | Delete a candidate application |
+| GET    | `/api/lookups/countries` | No    | List countries (form dropdown)  |
+| GET    | `/api/lookups/countries/{id}/states` | No | Cascading states for a country |
+| GET    | `/api/lookups/categories/{category}` | No | Values for Gender / MaritalStatus / EmploymentType / Source |
+
+The candidate form loads its dropdowns dynamically from the `/api/lookups/*`
+endpoints (backed by the `Countries`, `States`, and `LookupValues` tables),
+with the **State** field cascading off the selected **Country**. Countries
+without seeded states fall back to a free-text input.
 
 Passwords are stored as PBKDF2 (SHA-256) salted hashes; protected endpoints
 require a `Bearer` JWT.

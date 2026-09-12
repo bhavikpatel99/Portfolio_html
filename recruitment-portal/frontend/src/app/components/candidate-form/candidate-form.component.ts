@@ -4,7 +4,9 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CandidateService } from '../../services/candidate.service';
+import { LookupService } from '../../services/lookup.service';
 import { Candidate } from '../../models/candidate.model';
+import { Country, StateItem } from '../../models/lookup.model';
 import {
   Validators,
   phoneValidator,
@@ -23,6 +25,7 @@ import {
 export class CandidateFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private candidateService = inject(CandidateService);
+  private lookup = inject(LookupService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -31,11 +34,14 @@ export class CandidateFormComponent implements OnInit {
   successMessage = '';
   candidateId: number | null = null;
 
-  // Dropdown option lists
-  genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
-  maritalStatuses = ['Single', 'Married', 'Divorced', 'Widowed', 'Prefer not to say'];
-  employmentTypes = ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'];
-  sources = ['Job Board', 'LinkedIn', 'Referral', 'Company Website', 'Social Media', 'Other'];
+  // Dropdown option lists — loaded dynamically from the backend
+  countries: Country[] = [];
+  states: StateItem[] = [];
+  loadingStates = false;
+  genders: string[] = [];
+  maritalStatuses: string[] = [];
+  employmentTypes: string[] = [];
+  sources: string[] = [];
 
   form = this.fb.nonNullable.group(
     {
@@ -96,11 +102,53 @@ export class CandidateFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      this.candidateId = Number(idParam);
-      this.loadCandidate(this.candidateId);
-    }
+    this.loadLookups();
+
+    // Countries must be available before we can resolve a saved candidate's
+    // country name to an id (to load its states), so load candidate after.
+    this.lookup.getCountries().subscribe({
+      next: (countries) => {
+        this.countries = countries;
+        const idParam = this.route.snapshot.paramMap.get('id');
+        if (idParam) {
+          this.candidateId = Number(idParam);
+          this.loadCandidate(this.candidateId);
+        }
+      },
+      error: () => (this.errorMessage = 'Could not load country list.')
+    });
+  }
+
+  private loadLookups(): void {
+    this.lookup.getCategory('Gender').subscribe((v) => (this.genders = v));
+    this.lookup.getCategory('MaritalStatus').subscribe((v) => (this.maritalStatuses = v));
+    this.lookup.getCategory('EmploymentType').subscribe((v) => (this.employmentTypes = v));
+    this.lookup.getCategory('Source').subscribe((v) => (this.sources = v));
+  }
+
+  /** Fired when the country dropdown changes — loads matching states and clears the old state. */
+  onCountryChange(): void {
+    const countryName = this.form.controls.country.value;
+    this.states = [];
+    this.form.controls.state.setValue('');
+    this.loadStatesForCountry(countryName);
+  }
+
+  private loadStatesForCountry(countryName: string): void {
+    const country = this.countries.find((c) => c.name === countryName);
+    if (!country) return;
+
+    this.loadingStates = true;
+    this.lookup.getStates(country.id).subscribe({
+      next: (states) => {
+        this.states = states;
+        this.loadingStates = false;
+      },
+      error: () => {
+        this.states = [];
+        this.loadingStates = false;
+      }
+    });
   }
 
   private loadCandidate(id: number): void {
@@ -143,6 +191,11 @@ export class CandidateFormComponent implements OnInit {
           referenceContact: c.referenceContact ?? '',
           source: c.source ?? ''
         });
+
+        // Load the states for the saved country so the state dropdown shows it.
+        if (c.country) {
+          this.loadStatesForCountry(c.country);
+        }
       },
       error: () => (this.errorMessage = 'Could not load candidate details.')
     });
