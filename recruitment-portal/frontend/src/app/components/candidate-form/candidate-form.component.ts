@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
 import { CandidateService } from '../../services/candidate.service';
 import { Candidate } from '../../models/candidate.model';
 
@@ -12,6 +13,11 @@ import { Candidate } from '../../models/candidate.model';
   templateUrl: './candidate-form.component.html'
 })
 export class CandidateFormComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private candidateService = inject(CandidateService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   submitting = false;
   errorMessage = '';
   successMessage = '';
@@ -44,13 +50,6 @@ export class CandidateFormComponent implements OnInit {
     coverLetter: ['']
   });
 
-  constructor(
-    private fb: FormBuilder,
-    private candidateService: CandidateService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
-
   get f() {
     return this.form.controls;
   }
@@ -71,8 +70,28 @@ export class CandidateFormComponent implements OnInit {
     this.candidateService.getById(id).subscribe({
       next: (c) => {
         this.form.patchValue({
-          ...c,
-          dateOfBirth: c.dateOfBirth ? c.dateOfBirth.substring(0, 10) : ''
+          firstName: c.firstName ?? '',
+          lastName: c.lastName ?? '',
+          email: c.email ?? '',
+          phone: c.phone ?? '',
+          dateOfBirth: c.dateOfBirth ? c.dateOfBirth.substring(0, 10) : '',
+          gender: c.gender ?? '',
+          address: c.address ?? '',
+          city: c.city ?? '',
+          state: c.state ?? '',
+          country: c.country ?? '',
+          postalCode: c.postalCode ?? '',
+          positionApplied: c.positionApplied ?? '',
+          totalExperience: c.totalExperience ?? null,
+          currentCompany: c.currentCompany ?? '',
+          currentCtc: c.currentCtc ?? null,
+          expectedCtc: c.expectedCtc ?? null,
+          noticePeriodDays: c.noticePeriodDays ?? null,
+          highestQualification: c.highestQualification ?? '',
+          skills: c.skills ?? '',
+          linkedInUrl: c.linkedInUrl ?? '',
+          resumeUrl: c.resumeUrl ?? '',
+          coverLetter: c.coverLetter ?? ''
         });
       },
       error: () => (this.errorMessage = 'Could not load candidate details.')
@@ -90,7 +109,7 @@ export class CandidateFormComponent implements OnInit {
     this.submitting = true;
     const payload = this.form.getRawValue() as Candidate;
 
-    const request$ = this.isEdit
+    const request$: Observable<Candidate | void> = this.isEdit
       ? this.candidateService.update(this.candidateId!, payload)
       : this.candidateService.create(payload);
 
