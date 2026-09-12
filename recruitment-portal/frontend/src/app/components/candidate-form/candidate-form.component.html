@@ -5,37 +5,64 @@
 
 <div class="container">
   <h1>{{ isEdit ? 'Edit Application' : 'Candidate Application Form' }}</h1>
-  <p class="muted mb-4">Fill in the details below to {{ isEdit ? 'update the' : 'submit your' }} application.</p>
+  <p class="muted mb-4">Fill in the details below to {{ isEdit ? 'update the' : 'submit your' }} application. Fields marked * are required.</p>
 
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
   <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="card">
 
+    <!-- ============ Personal Details ============ -->
     <div class="section-title">Personal Details</div>
     <div class="form-grid">
       <div class="form-group">
         <label for="firstName">First Name *</label>
         <input id="firstName" type="text" formControlName="firstName" />
-        <div class="error-text" *ngIf="f.firstName.touched && f.firstName.invalid">First name is required.</div>
+        <div class="error-text" *ngIf="f.firstName.touched && f.firstName.invalid">
+          <span *ngIf="f.firstName.errors?.['required']">First name is required.</span>
+          <span *ngIf="f.firstName.errors?.['minlength']">At least 2 characters.</span>
+          <span *ngIf="f.firstName.errors?.['maxlength']">Maximum 100 characters.</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="middleName">Middle Name</label>
+        <input id="middleName" type="text" formControlName="middleName" />
+        <div class="error-text" *ngIf="f.middleName.touched && f.middleName.errors?.['maxlength']">Maximum 100 characters.</div>
       </div>
       <div class="form-group">
         <label for="lastName">Last Name *</label>
         <input id="lastName" type="text" formControlName="lastName" />
-        <div class="error-text" *ngIf="f.lastName.touched && f.lastName.invalid">Last name is required.</div>
+        <div class="error-text" *ngIf="f.lastName.touched && f.lastName.invalid">
+          <span *ngIf="f.lastName.errors?.['required']">Last name is required.</span>
+          <span *ngIf="f.lastName.errors?.['minlength']">At least 2 characters.</span>
+          <span *ngIf="f.lastName.errors?.['maxlength']">Maximum 100 characters.</span>
+        </div>
       </div>
       <div class="form-group">
         <label for="email">Email *</label>
         <input id="email" type="email" formControlName="email" />
-        <div class="error-text" *ngIf="f.email.touched && f.email.invalid">A valid email is required.</div>
+        <div class="error-text" *ngIf="f.email.touched && f.email.invalid">
+          <span *ngIf="f.email.errors?.['required']">Email is required.</span>
+          <span *ngIf="f.email.errors?.['email']">Enter a valid email address.</span>
+        </div>
       </div>
       <div class="form-group">
         <label for="phone">Phone</label>
-        <input id="phone" type="tel" formControlName="phone" />
+        <input id="phone" type="tel" formControlName="phone" placeholder="+1 555 123 4567" />
+        <div class="error-text" *ngIf="f.phone.touched && f.phone.errors?.['pattern']">Enter a valid phone number.</div>
+      </div>
+      <div class="form-group">
+        <label for="alternatePhone">Alternate Phone</label>
+        <input id="alternatePhone" type="tel" formControlName="alternatePhone" />
+        <div class="error-text" *ngIf="f.alternatePhone.touched && f.alternatePhone.errors?.['pattern']">Enter a valid phone number.</div>
       </div>
       <div class="form-group">
         <label for="dateOfBirth">Date of Birth</label>
         <input id="dateOfBirth" type="date" formControlName="dateOfBirth" />
+        <div class="error-text" *ngIf="f.dateOfBirth.touched && f.dateOfBirth.invalid">
+          <span *ngIf="f.dateOfBirth.errors?.['futureDate']">Date of birth cannot be in the future.</span>
+          <span *ngIf="f.dateOfBirth.errors?.['minAge']">Candidate must be at least 16 years old.</span>
+        </div>
       </div>
       <div class="form-group">
         <label for="gender">Gender</label>
@@ -44,32 +71,58 @@
           <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
         </select>
       </div>
+      <div class="form-group">
+        <label for="maritalStatus">Marital Status</label>
+        <select id="maritalStatus" formControlName="maritalStatus">
+          <option value="">-- Select --</option>
+          <option *ngFor="let m of maritalStatuses" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="nationality">Nationality</label>
+        <input id="nationality" type="text" formControlName="nationality" />
+        <div class="error-text" *ngIf="f.nationality.touched && f.nationality.errors?.['maxlength']">Maximum 100 characters.</div>
+      </div>
     </div>
 
+    <!-- ============ Address ============ -->
     <div class="section-title">Address</div>
     <div class="form-grid">
       <div class="form-group">
         <label for="address">Street Address</label>
         <input id="address" type="text" formControlName="address" />
+        <div class="error-text" *ngIf="f.address.touched && f.address.errors?.['maxlength']">Maximum 500 characters.</div>
       </div>
       <div class="form-group">
         <label for="city">City</label>
         <input id="city" type="text" formControlName="city" />
       </div>
       <div class="form-group">
-        <label for="state">State / Province</label>
-        <input id="state" type="text" formControlName="state" />
+        <label for="country">Country</label>
+        <select id="country" formControlName="country" (change)="onCountryChange()">
+          <option value="">-- Select country --</option>
+          <option *ngFor="let c of countries" [value]="c.name">{{ c.name }}</option>
+        </select>
       </div>
       <div class="form-group">
-        <label for="country">Country</label>
-        <input id="country" type="text" formControlName="country" />
+        <label for="state">State / Province</label>
+        <!-- When the selected country has seeded states, show a dropdown… -->
+        <select id="state" *ngIf="states.length > 0" formControlName="state">
+          <option value="">-- Select state --</option>
+          <option *ngFor="let s of states" [value]="s.name">{{ s.name }}</option>
+        </select>
+        <!-- …otherwise fall back to free text so any region can be entered. -->
+        <input id="stateText" *ngIf="states.length === 0" type="text" formControlName="state"
+               [placeholder]="loadingStates ? 'Loading states…' : 'Enter state / province'" />
       </div>
       <div class="form-group">
         <label for="postalCode">Postal Code</label>
         <input id="postalCode" type="text" formControlName="postalCode" />
+        <div class="error-text" *ngIf="f.postalCode.touched && f.postalCode.errors?.['pattern']">Enter a valid postal code.</div>
       </div>
     </div>
 
+    <!-- ============ Professional Details ============ -->
     <div class="section-title">Professional Details</div>
     <div class="form-grid">
       <div class="form-group">
@@ -77,8 +130,19 @@
         <input id="positionApplied" type="text" formControlName="positionApplied" />
       </div>
       <div class="form-group">
+        <label for="employmentType">Employment Type</label>
+        <select id="employmentType" formControlName="employmentType">
+          <option value="">-- Select --</option>
+          <option *ngFor="let e of employmentTypes" [value]="e">{{ e }}</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label for="totalExperience">Total Experience (years)</label>
-        <input id="totalExperience" type="number" step="0.1" min="0" formControlName="totalExperience" />
+        <input id="totalExperience" type="number" step="0.1" min="0" max="60" formControlName="totalExperience" />
+        <div class="error-text" *ngIf="f.totalExperience.touched && f.totalExperience.invalid">
+          <span *ngIf="f.totalExperience.errors?.['min']">Cannot be negative.</span>
+          <span *ngIf="f.totalExperience.errors?.['max']">Maximum 60 years.</span>
+        </div>
       </div>
       <div class="form-group">
         <label for="currentCompany">Current Company</label>
@@ -91,31 +155,69 @@
       <div class="form-group">
         <label for="currentCtc">Current CTC</label>
         <input id="currentCtc" type="number" step="0.01" min="0" formControlName="currentCtc" />
+        <div class="error-text" *ngIf="f.currentCtc.touched && f.currentCtc.errors?.['min']">Cannot be negative.</div>
       </div>
       <div class="form-group">
         <label for="expectedCtc">Expected CTC</label>
         <input id="expectedCtc" type="number" step="0.01" min="0" formControlName="expectedCtc" />
+        <div class="error-text" *ngIf="f.expectedCtc.touched && f.expectedCtc.errors?.['min']">Cannot be negative.</div>
+        <div class="error-text" *ngIf="form.errors?.['expectedBelowCurrent'] && f.expectedCtc.touched">
+          Expected CTC should not be lower than current CTC.
+        </div>
       </div>
       <div class="form-group">
         <label for="noticePeriodDays">Notice Period (days)</label>
-        <input id="noticePeriodDays" type="number" min="0" formControlName="noticePeriodDays" />
+        <input id="noticePeriodDays" type="number" min="0" max="365" formControlName="noticePeriodDays" />
+        <div class="error-text" *ngIf="f.noticePeriodDays.touched && f.noticePeriodDays.invalid">
+          <span *ngIf="f.noticePeriodDays.errors?.['min']">Cannot be negative.</span>
+          <span *ngIf="f.noticePeriodDays.errors?.['max']">Maximum 365 days.</span>
+        </div>
       </div>
+      <div class="form-group">
+        <label for="preferredLocation">Preferred Location</label>
+        <input id="preferredLocation" type="text" formControlName="preferredLocation" />
+      </div>
+      <div class="form-group">
+        <label for="availableFrom">Available From</label>
+        <input id="availableFrom" type="date" formControlName="availableFrom" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="willingToRelocate" />
+        Willing to relocate
+      </label>
     </div>
 
     <div class="form-group">
       <label for="skills">Skills (comma separated)</label>
       <input id="skills" type="text" formControlName="skills" placeholder="C#, Angular, SQL Server" />
+      <div class="error-text" *ngIf="f.skills.touched && f.skills.errors?.['maxlength']">Maximum 1000 characters.</div>
     </div>
 
-    <div class="section-title">Links & Documents</div>
+    <!-- ============ Links & Documents ============ -->
+    <div class="section-title">Links &amp; Documents</div>
     <div class="form-grid">
       <div class="form-group">
         <label for="linkedInUrl">LinkedIn URL</label>
         <input id="linkedInUrl" type="url" formControlName="linkedInUrl" placeholder="https://linkedin.com/in/…" />
+        <div class="error-text" *ngIf="f.linkedInUrl.touched && f.linkedInUrl.errors?.['pattern']">Enter a valid URL (starting with http:// or https://).</div>
+      </div>
+      <div class="form-group">
+        <label for="portfolioUrl">Portfolio / Website URL</label>
+        <input id="portfolioUrl" type="url" formControlName="portfolioUrl" placeholder="https://…" />
+        <div class="error-text" *ngIf="f.portfolioUrl.touched && f.portfolioUrl.errors?.['pattern']">Enter a valid URL.</div>
+      </div>
+      <div class="form-group">
+        <label for="gitHubUrl">GitHub URL</label>
+        <input id="gitHubUrl" type="url" formControlName="gitHubUrl" placeholder="https://github.com/…" />
+        <div class="error-text" *ngIf="f.gitHubUrl.touched && f.gitHubUrl.errors?.['pattern']">Enter a valid URL.</div>
       </div>
       <div class="form-group">
         <label for="resumeUrl">Resume URL</label>
         <input id="resumeUrl" type="url" formControlName="resumeUrl" placeholder="https://…" />
+        <div class="error-text" *ngIf="f.resumeUrl.touched && f.resumeUrl.errors?.['pattern']">Enter a valid URL.</div>
       </div>
     </div>
 
@@ -123,6 +225,27 @@
       <label for="coverLetter">Cover Letter</label>
       <textarea id="coverLetter" formControlName="coverLetter" rows="5"
                 placeholder="Tell us why you're a great fit…"></textarea>
+      <div class="error-text" *ngIf="f.coverLetter.touched && f.coverLetter.errors?.['maxlength']">Maximum 4000 characters.</div>
+    </div>
+
+    <!-- ============ References & Source ============ -->
+    <div class="section-title">References &amp; Source</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="referenceName">Reference Name</label>
+        <input id="referenceName" type="text" formControlName="referenceName" />
+      </div>
+      <div class="form-group">
+        <label for="referenceContact">Reference Contact (email / phone)</label>
+        <input id="referenceContact" type="text" formControlName="referenceContact" />
+      </div>
+      <div class="form-group">
+        <label for="source">How did you hear about us?</label>
+        <select id="source" formControlName="source">
+          <option value="">-- Select --</option>
+          <option *ngFor="let s of sources" [value]="s">{{ s }}</option>
+        </select>
+      </div>
     </div>
 
     <div class="flex-between mt-4">

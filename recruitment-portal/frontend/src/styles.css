@@ -71,6 +71,21 @@ textarea { resize: vertical; min-height: 90px; }
 
 .form-group { margin-bottom: 16px; }
 
+/* Checkbox rows opt out of the full-width input rule */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--primary);
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
