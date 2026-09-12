@@ -1,0 +1,50 @@
+<nav class="navbar">
+  <span class="brand">Recruitment Portal</span>
+  <div class="user-info">
+    <span class="muted">Hi, {{ auth.user()?.fullName }}</span>
+    <button class="btn btn-secondary" (click)="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="flex-between mb-4">
+    <h1>Candidate Applications</h1>
+    <a routerLink="/candidate/new" class="btn">+ New Application</a>
+  </div>
+
+  <div *ngIf="errorMessage()" class="alert alert-error">{{ errorMessage() }}</div>
+
+  <div class="card">
+    <p *ngIf="loading()" class="muted text-center">Loading…</p>
+
+    <p *ngIf="!loading() && candidates().length === 0" class="muted text-center">
+      No applications yet. Click <a routerLink="/candidate/new">New Application</a> to add one.
+    </p>
+
+    <table class="table" *ngIf="!loading() && candidates().length > 0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Position</th>
+          <th>Experience</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of candidates()">
+          <td>{{ c.firstName }} {{ c.lastName }}</td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.positionApplied || '—' }}</td>
+          <td>{{ c.totalExperience != null ? c.totalExperience + ' yrs' : '—' }}</td>
+          <td><span class="badge">{{ c.status }}</span></td>
+          <td>
+            <button class="btn btn-secondary" (click)="edit(c.id)">Edit</button>
+            <button class="btn btn-danger mt-2" (click)="remove(c)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

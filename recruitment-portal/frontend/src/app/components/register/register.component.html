@@ -1,0 +1,42 @@
+<div class="auth-wrapper">
+  <div class="card auth-card">
+    <h1 class="text-center">Create Account</h1>
+    <p class="text-center muted mb-4">Register to apply as a candidate</p>
+
+    <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" formControlName="fullName" placeholder="Jane Doe" />
+        <div class="error-text" *ngIf="f.fullName.touched && f.fullName.invalid">
+          Full name is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+        <div class="error-text" *ngIf="f.email.touched && f.email.invalid">
+          Please enter a valid email address.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="At least 6 characters" />
+        <div class="error-text" *ngIf="f.password.touched && f.password.invalid">
+          Password must be at least 6 characters.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-block" [disabled]="submitting">
+        {{ submitting ? 'Creating account…' : 'Register' }}
+      </button>
+    </form>
+
+    <p class="text-center mt-4 muted">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>
