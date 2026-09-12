@@ -1,10 +1,18 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CandidateService } from '../../services/candidate.service';
 import { Candidate } from '../../models/candidate.model';
+import {
+  Validators,
+  phoneValidator,
+  urlValidator,
+  notFutureDate,
+  minAge,
+  expectedCtcNotBelowCurrent
+} from '../../shared/validators';
 
 @Component({
   selector: 'app-candidate-form',
@@ -23,32 +31,61 @@ export class CandidateFormComponent implements OnInit {
   successMessage = '';
   candidateId: number | null = null;
 
+  // Dropdown option lists
   genders = ['Male', 'Female', 'Other', 'Prefer not to say'];
+  maritalStatuses = ['Single', 'Married', 'Divorced', 'Widowed', 'Prefer not to say'];
+  employmentTypes = ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship'];
+  sources = ['Job Board', 'LinkedIn', 'Referral', 'Company Website', 'Social Media', 'Other'];
 
-  form = this.fb.nonNullable.group({
-    firstName: ['', [Validators.required, Validators.maxLength(100)]],
-    lastName: ['', [Validators.required, Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    phone: [''],
-    dateOfBirth: [''],
-    gender: [''],
-    address: [''],
-    city: [''],
-    state: [''],
-    country: [''],
-    postalCode: [''],
-    positionApplied: [''],
-    totalExperience: [null as number | null],
-    currentCompany: [''],
-    currentCtc: [null as number | null],
-    expectedCtc: [null as number | null],
-    noticePeriodDays: [null as number | null],
-    highestQualification: [''],
-    skills: [''],
-    linkedInUrl: [''],
-    resumeUrl: [''],
-    coverLetter: ['']
-  });
+  form = this.fb.nonNullable.group(
+    {
+      // Personal details
+      firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      middleName: ['', [Validators.maxLength(100)]],
+      lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(256)]],
+      phone: ['', [phoneValidator]],
+      alternatePhone: ['', [phoneValidator]],
+      dateOfBirth: ['', [notFutureDate, minAge(16)]],
+      gender: [''],
+      maritalStatus: [''],
+      nationality: ['', [Validators.maxLength(100)]],
+
+      // Address
+      address: ['', [Validators.maxLength(500)]],
+      city: ['', [Validators.maxLength(100)]],
+      state: ['', [Validators.maxLength(100)]],
+      country: ['', [Validators.maxLength(100)]],
+      postalCode: ['', [Validators.maxLength(20), Validators.pattern(/^[A-Za-z0-9\s-]{3,20}$/)]],
+
+      // Professional details
+      positionApplied: ['', [Validators.maxLength(150)]],
+      employmentType: [''],
+      totalExperience: [null as number | null, [Validators.min(0), Validators.max(60)]],
+      currentCompany: ['', [Validators.maxLength(150)]],
+      currentCtc: [null as number | null, [Validators.min(0)]],
+      expectedCtc: [null as number | null, [Validators.min(0)]],
+      noticePeriodDays: [null as number | null, [Validators.min(0), Validators.max(365)]],
+      preferredLocation: ['', [Validators.maxLength(150)]],
+      willingToRelocate: [false],
+      availableFrom: [''],
+      highestQualification: ['', [Validators.maxLength(150)]],
+      skills: ['', [Validators.maxLength(1000)]],
+
+      // Links & documents
+      linkedInUrl: ['', [urlValidator, Validators.maxLength(300)]],
+      portfolioUrl: ['', [urlValidator, Validators.maxLength(300)]],
+      gitHubUrl: ['', [urlValidator, Validators.maxLength(300)]],
+      resumeUrl: ['', [urlValidator, Validators.maxLength(300)]],
+      coverLetter: ['', [Validators.maxLength(4000)]],
+
+      // References & meta
+      referenceName: ['', [Validators.maxLength(150)]],
+      referenceContact: ['', [Validators.maxLength(150)]],
+      source: ['']
+    },
+    { validators: expectedCtcNotBelowCurrent('currentCtc', 'expectedCtc') }
+  );
 
   get f() {
     return this.form.controls;
@@ -71,27 +108,40 @@ export class CandidateFormComponent implements OnInit {
       next: (c) => {
         this.form.patchValue({
           firstName: c.firstName ?? '',
+          middleName: c.middleName ?? '',
           lastName: c.lastName ?? '',
           email: c.email ?? '',
           phone: c.phone ?? '',
+          alternatePhone: c.alternatePhone ?? '',
           dateOfBirth: c.dateOfBirth ? c.dateOfBirth.substring(0, 10) : '',
           gender: c.gender ?? '',
+          maritalStatus: c.maritalStatus ?? '',
+          nationality: c.nationality ?? '',
           address: c.address ?? '',
           city: c.city ?? '',
           state: c.state ?? '',
           country: c.country ?? '',
           postalCode: c.postalCode ?? '',
           positionApplied: c.positionApplied ?? '',
+          employmentType: c.employmentType ?? '',
           totalExperience: c.totalExperience ?? null,
           currentCompany: c.currentCompany ?? '',
           currentCtc: c.currentCtc ?? null,
           expectedCtc: c.expectedCtc ?? null,
           noticePeriodDays: c.noticePeriodDays ?? null,
+          preferredLocation: c.preferredLocation ?? '',
+          willingToRelocate: c.willingToRelocate ?? false,
+          availableFrom: c.availableFrom ? c.availableFrom.substring(0, 10) : '',
           highestQualification: c.highestQualification ?? '',
           skills: c.skills ?? '',
           linkedInUrl: c.linkedInUrl ?? '',
+          portfolioUrl: c.portfolioUrl ?? '',
+          gitHubUrl: c.gitHubUrl ?? '',
           resumeUrl: c.resumeUrl ?? '',
-          coverLetter: c.coverLetter ?? ''
+          coverLetter: c.coverLetter ?? '',
+          referenceName: c.referenceName ?? '',
+          referenceContact: c.referenceContact ?? '',
+          source: c.source ?? ''
         });
       },
       error: () => (this.errorMessage = 'Could not load candidate details.')
@@ -103,6 +153,7 @@ export class CandidateFormComponent implements OnInit {
     this.successMessage = '';
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.errorMessage = 'Please fix the highlighted fields before submitting.';
       return;
     }
 

@@ -10,10 +10,12 @@ public sealed class CandidateRepository : ICandidateRepository
     private readonly IDbConnectionFactory _connectionFactory;
 
     private const string SelectColumns = @"
-        Id, UserId, FirstName, LastName, Email, Phone, DateOfBirth, Gender,
-        Address, City, State, Country, PostalCode, PositionApplied, TotalExperience,
-        CurrentCompany, CurrentCtc, ExpectedCtc, NoticePeriodDays, HighestQualification,
-        Skills, LinkedInUrl, ResumeUrl, CoverLetter, Status, CreatedAt, UpdatedAt";
+        Id, UserId, FirstName, MiddleName, LastName, Email, Phone, AlternatePhone, DateOfBirth,
+        Gender, MaritalStatus, Nationality, Address, City, State, Country, PostalCode,
+        PositionApplied, EmploymentType, TotalExperience, CurrentCompany, CurrentCtc, ExpectedCtc,
+        NoticePeriodDays, PreferredLocation, WillingToRelocate, AvailableFrom, HighestQualification,
+        Skills, LinkedInUrl, PortfolioUrl, GitHubUrl, ResumeUrl, CoverLetter, ReferenceName,
+        ReferenceContact, Source, Status, CreatedAt, UpdatedAt";
 
     public CandidateRepository(IDbConnectionFactory connectionFactory)
     {
@@ -38,15 +40,19 @@ public sealed class CandidateRepository : ICandidateRepository
     {
         const string sql = @"
             INSERT INTO dbo.Candidates
-            (UserId, FirstName, LastName, Email, Phone, DateOfBirth, Gender, Address, City, State,
-             Country, PostalCode, PositionApplied, TotalExperience, CurrentCompany, CurrentCtc,
-             ExpectedCtc, NoticePeriodDays, HighestQualification, Skills, LinkedInUrl, ResumeUrl,
-             CoverLetter, Status)
+            (UserId, FirstName, MiddleName, LastName, Email, Phone, AlternatePhone, DateOfBirth,
+             Gender, MaritalStatus, Nationality, Address, City, State, Country, PostalCode,
+             PositionApplied, EmploymentType, TotalExperience, CurrentCompany, CurrentCtc, ExpectedCtc,
+             NoticePeriodDays, PreferredLocation, WillingToRelocate, AvailableFrom, HighestQualification,
+             Skills, LinkedInUrl, PortfolioUrl, GitHubUrl, ResumeUrl, CoverLetter, ReferenceName,
+             ReferenceContact, Source, Status)
             VALUES
-            (@UserId, @FirstName, @LastName, @Email, @Phone, @DateOfBirth, @Gender, @Address, @City, @State,
-             @Country, @PostalCode, @PositionApplied, @TotalExperience, @CurrentCompany, @CurrentCtc,
-             @ExpectedCtc, @NoticePeriodDays, @HighestQualification, @Skills, @LinkedInUrl, @ResumeUrl,
-             @CoverLetter, @Status);
+            (@UserId, @FirstName, @MiddleName, @LastName, @Email, @Phone, @AlternatePhone, @DateOfBirth,
+             @Gender, @MaritalStatus, @Nationality, @Address, @City, @State, @Country, @PostalCode,
+             @PositionApplied, @EmploymentType, @TotalExperience, @CurrentCompany, @CurrentCtc, @ExpectedCtc,
+             @NoticePeriodDays, @PreferredLocation, @WillingToRelocate, @AvailableFrom, @HighestQualification,
+             @Skills, @LinkedInUrl, @PortfolioUrl, @GitHubUrl, @ResumeUrl, @CoverLetter, @ReferenceName,
+             @ReferenceContact, @Source, @Status);
             SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
         using var connection = _connectionFactory.CreateConnection();
@@ -57,14 +63,19 @@ public sealed class CandidateRepository : ICandidateRepository
     {
         const string sql = @"
             UPDATE dbo.Candidates SET
-                FirstName = @FirstName, LastName = @LastName, Email = @Email, Phone = @Phone,
-                DateOfBirth = @DateOfBirth, Gender = @Gender, Address = @Address, City = @City,
-                State = @State, Country = @Country, PostalCode = @PostalCode,
-                PositionApplied = @PositionApplied, TotalExperience = @TotalExperience,
-                CurrentCompany = @CurrentCompany, CurrentCtc = @CurrentCtc, ExpectedCtc = @ExpectedCtc,
-                NoticePeriodDays = @NoticePeriodDays, HighestQualification = @HighestQualification,
-                Skills = @Skills, LinkedInUrl = @LinkedInUrl, ResumeUrl = @ResumeUrl,
-                CoverLetter = @CoverLetter, Status = @Status, UpdatedAt = SYSUTCDATETIME()
+                FirstName = @FirstName, MiddleName = @MiddleName, LastName = @LastName, Email = @Email,
+                Phone = @Phone, AlternatePhone = @AlternatePhone, DateOfBirth = @DateOfBirth,
+                Gender = @Gender, MaritalStatus = @MaritalStatus, Nationality = @Nationality,
+                Address = @Address, City = @City, State = @State, Country = @Country, PostalCode = @PostalCode,
+                PositionApplied = @PositionApplied, EmploymentType = @EmploymentType,
+                TotalExperience = @TotalExperience, CurrentCompany = @CurrentCompany, CurrentCtc = @CurrentCtc,
+                ExpectedCtc = @ExpectedCtc, NoticePeriodDays = @NoticePeriodDays,
+                PreferredLocation = @PreferredLocation, WillingToRelocate = @WillingToRelocate,
+                AvailableFrom = @AvailableFrom, HighestQualification = @HighestQualification, Skills = @Skills,
+                LinkedInUrl = @LinkedInUrl, PortfolioUrl = @PortfolioUrl, GitHubUrl = @GitHubUrl,
+                ResumeUrl = @ResumeUrl, CoverLetter = @CoverLetter, ReferenceName = @ReferenceName,
+                ReferenceContact = @ReferenceContact, Source = @Source, Status = @Status,
+                UpdatedAt = SYSUTCDATETIME()
             WHERE Id = @Id;";
 
         using var connection = _connectionFactory.CreateConnection();

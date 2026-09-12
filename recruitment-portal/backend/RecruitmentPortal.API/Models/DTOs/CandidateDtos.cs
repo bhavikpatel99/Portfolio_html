@@ -5,8 +5,12 @@ namespace RecruitmentPortal.API.Models.DTOs;
 /// <summary>Payload used to create or update a candidate profile/application.</summary>
 public class CandidateRequest
 {
+    // ---- Personal details ----
     [Required, StringLength(100)]
     public string FirstName { get; set; } = string.Empty;
+
+    [StringLength(100)]
+    public string? MiddleName { get; set; }
 
     [Required, StringLength(100)]
     public string LastName { get; set; } = string.Empty;
@@ -17,11 +21,21 @@ public class CandidateRequest
     [Phone, StringLength(30)]
     public string? Phone { get; set; }
 
+    [Phone, StringLength(30)]
+    public string? AlternatePhone { get; set; }
+
     public DateTime? DateOfBirth { get; set; }
 
     [StringLength(20)]
     public string? Gender { get; set; }
 
+    [StringLength(20)]
+    public string? MaritalStatus { get; set; }
+
+    [StringLength(100)]
+    public string? Nationality { get; set; }
+
+    // ---- Address ----
     [StringLength(500)]
     public string? Address { get; set; }
 
@@ -37,8 +51,12 @@ public class CandidateRequest
     [StringLength(20)]
     public string? PostalCode { get; set; }
 
+    // ---- Professional details ----
     [StringLength(150)]
     public string? PositionApplied { get; set; }
+
+    [StringLength(50)]
+    public string? EmploymentType { get; set; }
 
     [Range(0, 60)]
     public decimal? TotalExperience { get; set; }
@@ -56,16 +74,40 @@ public class CandidateRequest
     public int? NoticePeriodDays { get; set; }
 
     [StringLength(150)]
+    public string? PreferredLocation { get; set; }
+
+    public bool? WillingToRelocate { get; set; }
+
+    public DateTime? AvailableFrom { get; set; }
+
+    [StringLength(150)]
     public string? HighestQualification { get; set; }
 
     [StringLength(1000)]
     public string? Skills { get; set; }
 
+    // ---- Links & documents ----
     [Url, StringLength(300)]
     public string? LinkedInUrl { get; set; }
+
+    [Url, StringLength(300)]
+    public string? PortfolioUrl { get; set; }
+
+    [Url, StringLength(300)]
+    public string? GitHubUrl { get; set; }
 
     [Url, StringLength(300)]
     public string? ResumeUrl { get; set; }
 
     public string? CoverLetter { get; set; }
+
+    // ---- References & meta ----
+    [StringLength(150)]
+    public string? ReferenceName { get; set; }
+
+    [StringLength(150)]
+    public string? ReferenceContact { get; set; }
+
+    [StringLength(50)]
+    public string? Source { get; set; }
 }
